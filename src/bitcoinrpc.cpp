@@ -39,7 +39,7 @@ static boost::thread_group* rpc_worker_group = NULL;
 
 static inline unsigned short GetDefaultRPCPort()
 {
-    return GetBoolArg("-testnet", false) ? 19332 : 9332;
+    return GetBoolArg("-testnet", false) ? 31879 : 41879;
 }
 
 Object JSONRPCError(int code, const string& message)
@@ -93,7 +93,7 @@ void RPCTypeCheck(const Object& o,
 int64 AmountFromValue(const Value& value)
 {
     double dAmount = value.get_real();
-    if (dAmount <= 0.0 || dAmount > 84000000.0)
+    if (dAmount <= 0.0 || dAmount > 299792458.0)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount");
     int64 nAmount = roundint64(dAmount * COIN);
     if (!MoneyRange(nAmount))
@@ -182,10 +182,10 @@ Value stop(const Array& params, bool fHelp)
     if (fHelp || params.size() > 1)
         throw runtime_error(
             "stop\n"
-            "Stop Litecoin server.");
+            "Stop Einsteinium server.");
     // Shutdown will take long enough that the response should get back
     StartShutdown();
-    return "Litecoin server stopping";
+    return "Einsteinium server stopping";
 }
 
 
@@ -201,6 +201,7 @@ static const CRPCCommand vRPCCommands[] =
     { "help",                   &help,                   true,      true,       false },
     { "stop",                   &stop,                   true,      true,       false },
     { "getblockcount",          &getblockcount,          true,      false,      false },
+    { "getblockvalue",          &getblockvalue,          true,      false,      false },
     { "getbestblockhash",       &getbestblockhash,       true,      false,      false },
     { "getconnectioncount",     &getconnectioncount,     true,      false,      false },
     { "getpeerinfo",            &getpeerinfo,            true,      false,      false },
@@ -298,7 +299,7 @@ string HTTPPost(const string& strMsg, const map<string,string>& mapRequestHeader
 {
     ostringstream s;
     s << "POST / HTTP/1.1\r\n"
-      << "User-Agent: litecoin-json-rpc/" << FormatFullVersion() << "\r\n"
+      << "User-Agent: einsteinium-json-rpc/" << FormatFullVersion() << "\r\n"
       << "Host: 127.0.0.1\r\n"
       << "Content-Type: application/json\r\n"
       << "Content-Length: " << strMsg.size() << "\r\n"
@@ -329,7 +330,7 @@ static string HTTPReply(int nStatus, const string& strMsg, bool keepalive)
     if (nStatus == HTTP_UNAUTHORIZED)
         return strprintf("HTTP/1.0 401 Authorization Required\r\n"
             "Date: %s\r\n"
-            "Server: litecoin-json-rpc/%s\r\n"
+            "Server: einsteinium-json-rpc/%s\r\n"
             "WWW-Authenticate: Basic realm=\"jsonrpc\"\r\n"
             "Content-Type: text/html\r\n"
             "Content-Length: 296\r\n"
@@ -354,9 +355,9 @@ static string HTTPReply(int nStatus, const string& strMsg, bool keepalive)
             "HTTP/1.1 %d %s\r\n"
             "Date: %s\r\n"
             "Connection: %s\r\n"
-            "Content-Length: %"PRIszu"\r\n"
+            "Content-Length: %" PRIszu"\r\n"
             "Content-Type: application/json\r\n"
-            "Server: litecoin-json-rpc/%s\r\n"
+            "Server: einsteinium-json-rpc/%s\r\n"
             "\r\n"
             "%s",
         nStatus,
@@ -736,7 +737,7 @@ void StartRPCThreads()
     {
         unsigned char rand_pwd[32];
         RAND_bytes(rand_pwd, 32);
-        string strWhatAmI = "To use litecoind";
+        string strWhatAmI = "To use einsteiniumd";
         if (mapArgs.count("-server"))
             strWhatAmI = strprintf(_("To use the %s option"), "\"-server\"");
         else if (mapArgs.count("-daemon"))
@@ -745,13 +746,13 @@ void StartRPCThreads()
             _("%s, you must set a rpcpassword in the configuration file:\n"
               "%s\n"
               "It is recommended you use the following random password:\n"
-              "rpcuser=litecoinrpc\n"
+              "rpcuser=einsteiniumrpc\n"
               "rpcpassword=%s\n"
               "(you do not need to remember this password)\n"
               "The username and password MUST NOT be the same.\n"
               "If the file does not exist, create it with owner-readable-only file permissions.\n"
               "It is also recommended to set alertnotify so you are notified of problems;\n"
-              "for example: alertnotify=echo %%s | mail -s \"Litecoin Alert\" admin@foo.com\n"),
+              "for example: alertnotify=echo %%s | mail -s \"Einsteinium Alert\" admin@foo.com\n"),
                 strWhatAmI.c_str(),
                 GetConfigFile().string().c_str(),
                 EncodeBase58(&rand_pwd[0],&rand_pwd[0]+32).c_str()),
@@ -1162,6 +1163,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "listreceivedbyaccount"  && n > 1) ConvertTo<bool>(params[1]);
     if (strMethod == "getbalance"             && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "getblockhash"           && n > 0) ConvertTo<boost::int64_t>(params[0]);
+    if (strMethod == "getblockvalue"          && n > 0) ConvertTo<boost::int64_t>(params[0]);
     if (strMethod == "move"                   && n > 2) ConvertTo<double>(params[2]);
     if (strMethod == "move"                   && n > 3) ConvertTo<boost::int64_t>(params[3]);
     if (strMethod == "sendfrom"               && n > 2) ConvertTo<double>(params[2]);

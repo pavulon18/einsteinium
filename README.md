@@ -1,30 +1,37 @@
-Litecoin integration/staging tree
+Einsteinium integration/staging tree
 ================================
 
-http://www.litecoin.org
+http://emc2.foundation
 
 Copyright (c) 2009-2013 Bitcoin Developers
-Copyright (c) 2011-2013 Litecoin Developers
+Copyright (c) 2011-2013 Einsteinium Developers
+Copyright (c) 2014-2015 Einsteinium Developers
+Copyright (c) 2015 Einsteinium Foundation
 
-What is Litecoin?
+
+What is Einsteinium?
 ----------------
 
-Litecoin is a lite version of Bitcoin using scrypt as a proof-of-work algorithm.
- - 2.5 minute block targets
- - subsidy halves in 840k blocks (~4 years)
- - ~84 million total coins
+Einsteinium is a lite version of Bitcoin using scrypt as a proof-of-work algorithm.
 
-The rest is the same as Bitcoin.
- - 50 coins per block
- - 2016 blocks to retarget difficulty
+- Algorithm: Scrypt PoW
+- Total Einsteinium: 299,792,458
+- Initial block value: 1024
+- Reward Reduction Method: Block Halving
+- Block Target Time: 60 seconds
+- Difficulty Re-targeting: per block (Kimoto Gravity Well)
+- RPC Port: 41879
+- P2P Port: 41878
+- Donation to the Einsteinium Charitable Fund (per block): 2%
+- Donation to to faucets, give-aways and marketing (per block): 0.5%
 
 For more information, as well as an immediately useable, binary version of
-the Litecoin client sofware, see http://www.litecoin.org.
+the Einsteinium client sofware, see http://emc2.foundation.
 
 License
 -------
 
-Litecoin is released under the terms of the MIT license. See `COPYING` for more
+Einsteinium is released under the terms of the MIT license. See `COPYING` for more
 information or see http://opensource.org/licenses/MIT.
 
 Development process
@@ -33,12 +40,11 @@ Development process
 Developers work in their own trees, then submit pull requests when they think
 their feature or bug fix is ready.
 
-If it is a simple/trivial/non-controversial change, then one of the Litecoin
+If it is a simple/trivial/non-controversial change, then one of the Einsteinium
 development team members simply pulls it.
 
 If it is a *more complicated or potentially controversial* change, then the patch
-submitter will be asked to start a discussion (if they haven't already) on the
-[mailing list](http://sourceforge.net/mailarchive/forum.php?forum_name=bitcoin-development).
+submitter will be asked to start a discussion.
 
 The patch will be accepted if there is broad consensus that it is a good thing.
 Developers should expect to rework and resubmit patches if the code doesn't
@@ -46,8 +52,8 @@ match the project's coding conventions (see `doc/coding.txt`) or are
 controversial.
 
 The `master` branch is regularly built and tested, but is not guaranteed to be
-completely stable. [Tags](https://github.com/bitcoin/bitcoin/tags) are created
-regularly to indicate new official, stable release versions of Litecoin.
+completely stable. [Tags](https://github.com/emc2foundation/qt-wallet-emc2/tags) are created
+regularly to indicate new official, stable release versions of Einsteinium.
 
 Testing
 -------
@@ -70,5 +76,5 @@ Unit tests for the GUI code are in `src/qt/test/`. To compile and run them:
 
     qmake BITCOIN_QT_TEST=1 -o Makefile.test bitcoin-qt.pro
     make -f Makefile.test
-    ./litecoin-qt_test
+    ./einsteinium-qt_test
 
