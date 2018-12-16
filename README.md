@@ -1,3 +1,5 @@
+NOTE:  I am not planning on actually working on this code.  Instead, I am going to see if I can get it to work under some continuous integration service.  From there, I want to try to get it to compile for the Raspberry Pi.  I succeeded in compiling this on my RPi.  Knowing that it can be compiled on the RPi, it was the logical place to start.
+
 Einsteinium Core integration/staging tree
 =====================================
 
