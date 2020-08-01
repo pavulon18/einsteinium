@@ -96,10 +96,10 @@ class TestNode(NodeConnCB):
             raise AssertionError("Got pong for unknown ping [%s]" % repr(message))
 
     def on_reject(self, conn, message):
-        if message.message == b'tx':
-            self.tx_reject_map[message.data] = RejectResult(message.code, message.reason)
         if message.message == b'block':
             self.block_reject_map[message.data] = RejectResult(message.code, message.reason)
+        elif message.message == b'tx':
+            self.tx_reject_map[message.data] = RejectResult(message.code, message.reason)
 
     def send_inv(self, obj):
         mtype = 2 if isinstance(obj, CBlock) else 1
@@ -378,14 +378,14 @@ class TestManager(object):
 
             # Do final sync if we weren't syncing on every block or every tx.
             if (not test_instance.sync_every_block and block is not None):
-                if len(invqueue) > 0:
+                if invqueue:
                     [ c.send_message(msg_inv(invqueue)) for c in self.connections ]
                     invqueue = []
                 self.sync_blocks(block.sha256, len(test_instance.blocks_and_transactions))
                 if (not self.check_results(tip, block_outcome)):
                     raise AssertionError("Block test failed at test %d" % test_number)
             if (not test_instance.sync_every_tx and tx is not None):
-                if len(invqueue) > 0:
+                if invqueue:
                     [ c.send_message(msg_inv(invqueue)) for c in self.connections ]
                     invqueue = []
                 self.sync_transaction(tx.sha256, len(test_instance.blocks_and_transactions))

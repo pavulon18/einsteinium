@@ -137,8 +137,8 @@ class Socks5Server(object):
 
     def run(self):
         while self.running:
-            (sockconn, peer) = self.s.accept()
             if self.running:
+                (sockconn, peer) = self.s.accept()
                 conn = Socks5Connection(self, sockconn, peer)
                 thread = threading.Thread(None, conn.handle)
                 thread.daemon = True

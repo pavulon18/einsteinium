@@ -71,13 +71,13 @@ for b31 in range(2):
             for b18 in range(2):
                 rlt = base_relative_locktime
                 if (b31):
-                    rlt = rlt | seq_disable_flag
+                    rlt |= seq_disable_flag
                 if (b25):
-                    rlt = rlt | seq_random_high_bit
+                    rlt |= seq_random_high_bit
                 if (b22):
-                    rlt = rlt | seq_type_flag
+                    rlt |= seq_type_flag
                 if (b18):
-                    rlt = rlt | seq_random_low_bit
+                    rlt |= seq_random_low_bit
                 b18times.append(rlt)
             b22times.append(b18times)
         b25times.append(b22times)
@@ -131,7 +131,7 @@ class BIP68_112_113Test(ComparisonTestFramework):
         return tx
 
     def generate_blocks(self, number, version, test_blocks = []):
-        for i in range(number):
+        for _ in range(number):
             block = self.create_test_block([], version)
             test_blocks.append([block, True])
             self.last_block_time += 600
@@ -250,21 +250,23 @@ class BIP68_112_113Test(ComparisonTestFramework):
         # Note we reuse inputs for v1 and v2 txs so must test these separately
         # 16 normal inputs
         bip68inputs = []
-        for i in range(16):
+        for _ in range(16):
             bip68inputs.append(self.send_generic_input_tx(self.nodes[0], self.coinbase_blocks))
         # 2 sets of 16 inputs with 10 OP_CSV OP_DROP (actually will be prepended to spending scriptSig)
         bip112basicinputs = []
-        for j in range(2):
+        for _ in range(2):
             inputs = []
-            for i in range(16):
+            for _ in range(16):
                 inputs.append(self.send_generic_input_tx(self.nodes[0], self.coinbase_blocks))
             bip112basicinputs.append(inputs)
         # 2 sets of 16 varied inputs with (relative_lock_time) OP_CSV OP_DROP (actually will be prepended to spending scriptSig)
         bip112diverseinputs = []
-        for j in range(2):
-            inputs = []
-            for i in range(16):
-                inputs.append(self.send_generic_input_tx(self.nodes[0], self.coinbase_blocks))
+        for _ in range(2):
+            inputs = [
+                self.send_generic_input_tx(self.nodes[0], self.coinbase_blocks)
+                for _ in range(16)
+            ]
+
             bip112diverseinputs.append(inputs)
         # 1 special input with -1 OP_CSV OP_DROP (actually will be prepended to spending scriptSig)
         bip112specialinput = self.send_generic_input_tx(self.nodes[0], self.coinbase_blocks)
@@ -454,8 +456,7 @@ class BIP68_112_113Test(ComparisonTestFramework):
         self.nodes[0].invalidateblock(self.nodes[0].getbestblockhash())
 
         # If SEQUENCE_LOCKTIME_DISABLE_FLAG is unset in argument to OP_CSV, version 1 txs should now fail
-        fail_txs = []
-        fail_txs.extend(all_rlt_txs(bip112txs_vary_nSequence_v1))
+        fail_txs = list(all_rlt_txs(bip112txs_vary_nSequence_v1))
         fail_txs.extend(all_rlt_txs(bip112txs_vary_nSequence_9_v1))
         for b25 in range(2):
             for b22 in range(2):

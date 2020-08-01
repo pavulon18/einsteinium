@@ -28,8 +28,10 @@ class BIP68Test(BitcoinTestFramework):
         self.setup_clean_chain = False
 
     def setup_network(self):
-        self.nodes = []
-        self.nodes.append(start_node(0, self.options.tmpdir, ["-debug", "-blockprioritysize=0"]))
+        self.nodes = [
+            start_node(0, self.options.tmpdir, ["-debug", "-blockprioritysize=0"])
+        ]
+
         self.nodes.append(start_node(1, self.options.tmpdir, ["-debug", "-blockprioritysize=0", "-acceptnonstdtxn=0"]))
         self.is_network_split = False
         self.relayfee = self.nodes[0].getnetworkinfo()["relayfee"]
@@ -124,8 +126,8 @@ class BIP68Test(BitcoinTestFramework):
         addresses = []
         while len(addresses) < max_outputs:
             addresses.append(self.nodes[0].getnewaddress())
+        import random
         while len(self.nodes[0].listunspent()) < 200:
-            import random
             random.shuffle(addresses)
             num_outputs = random.randint(1, max_outputs)
             outputs = {}
@@ -148,7 +150,7 @@ class BIP68Test(BitcoinTestFramework):
 
             # Track whether any sequence locks used should fail
             should_pass = True
-            
+
             # Track whether this transaction was built with sequence locks
             using_sequence_locks = False
 

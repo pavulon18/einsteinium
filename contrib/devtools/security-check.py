@@ -109,11 +109,7 @@ def check_ELF_Canary(executable):
     (stdout, stderr) = p.communicate()
     if p.returncode:
         raise IOError('Error opening file')
-    ok = False
-    for line in stdout.split(b'\n'):
-        if b'__stack_chk_fail' in line:
-            ok = True
-    return ok
+    return any(b'__stack_chk_fail' in line for line in stdout.split(b'\n'))
 
 def get_PE_dll_characteristics(executable):
     '''
@@ -170,10 +166,7 @@ if __name__ == '__main__':
                 retval = 1
                 continue
 
-            failed = []
-            for (name, func) in CHECKS[etype]:
-                if not func(filename):
-                    failed.append(name)
+            failed = [name for (name, func) in CHECKS[etype] if not func(filename)]
             if failed:
                 print('%s: failed %s' % (filename, ' '.join(failed)))
                 retval = 1

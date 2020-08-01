@@ -34,19 +34,16 @@ class BitcoinRPC:
 			return None
 
 		body = resp.read()
-		resp_obj = json.loads(body)
-		return resp_obj
+		return json.loads(body)
 
 	@staticmethod
 	def build_request(idx, method, params):
-		obj = { 'version' : '1.1',
-			'method' : method,
-			'id' : idx }
-		if params is None:
-			obj['params'] = []
-		else:
-			obj['params'] = params
-		return obj
+		return {
+		    'version': '1.1',
+		    'method': method,
+		    'id': idx,
+		    'params': [] if params is None else params,
+		}
 
 	@staticmethod
 	def response_is_error(resp_obj):

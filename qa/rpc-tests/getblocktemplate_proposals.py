@@ -38,17 +38,15 @@ def dblsha(b):
 def genmrklroot(leaflist):
     cur = leaflist
     while len(cur) > 1:
-        n = []
         if len(cur) & 1:
             cur.append(cur[-1])
-        for i in range(0, len(cur), 2):
-            n.append(dblsha(cur[i] + cur[i+1]))
+        n = [dblsha(cur[i] + cur[i+1]) for i in range(0, len(cur), 2)]
         cur = n
     return cur[0]
 
 def template_to_bytearray(tmpl, txlist):
     blkver = pack('<L', tmpl['version'])
-    mrklroot = genmrklroot(list(dblsha(a) for a in txlist))
+    mrklroot = genmrklroot([dblsha(a) for a in txlist])
     timestamp = pack('<L', tmpl['curtime'])
     nonce = b'\0\0\0\0'
     blk = blkver + a2b_hex(tmpl['previousblockhash'])[::-1] + mrklroot + timestamp + a2b_hex(tmpl['bits'])[::-1] + nonce

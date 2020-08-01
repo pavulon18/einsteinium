@@ -96,13 +96,18 @@ class MaxUploadTest(BitcoinTestFramework):
 
     def setup_network(self):
         # Start a node with maxuploadtarget of 200 MB (/24h)
-        self.nodes = []
-        self.nodes.append(start_node(0, self.options.tmpdir, ["-debug", "-maxuploadtarget=800", "-blockmaxsize=999000"]))
+        self.nodes = [
+            start_node(
+                0,
+                self.options.tmpdir,
+                ["-debug", "-maxuploadtarget=800", "-blockmaxsize=999000"],
+            )
+        ]
 
     def mine_full_block(self, node, address):
         # Want to create a full block
         # We'll generate a 66k transaction below, and 14 of them is close to the 1MB block limit
-        for j in range(14):
+        for _ in range(14):
             if len(self.utxo) < 14:
                 self.utxo = node.listunspent()
             inputs=[]

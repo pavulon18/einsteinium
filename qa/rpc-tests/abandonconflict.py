@@ -15,8 +15,14 @@ class AbandonConflictTest(BitcoinTestFramework):
         self.setup_clean_chain = False
 
     def setup_network(self):
-        self.nodes = []
-        self.nodes.append(start_node(0, self.options.tmpdir, ["-debug","-logtimemicros","-minrelaytxfee=0.001"]))
+        self.nodes = [
+            start_node(
+                0,
+                self.options.tmpdir,
+                ["-debug", "-logtimemicros", "-minrelaytxfee=0.001"],
+            )
+        ]
+
         self.nodes.append(start_node(1, self.options.tmpdir, ["-debug","-logtimemicros"]))
         connect_nodes(self.nodes[0], 1)
 

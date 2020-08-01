@@ -74,14 +74,23 @@ class ReplaceByFeeTest(BitcoinTestFramework):
         self.setup_clean_chain = False
 
     def setup_network(self):
-        self.nodes = []
-        self.nodes.append(start_node(0, self.options.tmpdir, ["-maxorphantx=1000", "-debug",
-                                                              "-relaypriority=0", "-whitelist=127.0.0.1",
-                                                              "-limitancestorcount=50",
-                                                              "-limitancestorsize=101",
-                                                              "-limitdescendantcount=200",
-                                                              "-limitdescendantsize=101"
-                                                              ]))
+        self.nodes = [
+            start_node(
+                0,
+                self.options.tmpdir,
+                [
+                    "-maxorphantx=1000",
+                    "-debug",
+                    "-relaypriority=0",
+                    "-whitelist=127.0.0.1",
+                    "-limitancestorcount=50",
+                    "-limitancestorsize=101",
+                    "-limitdescendantcount=200",
+                    "-limitdescendantsize=101",
+                ],
+            )
+        ]
+
         self.is_network_split = False
 
     def run_test(self):
@@ -228,11 +237,10 @@ class ReplaceByFeeTest(BitcoinTestFramework):
             txid = int(txid, 16)
 
             for i, txout in enumerate(tx.vout):
-                for x in branch(COutPoint(txid, i), txout_value,
+                yield from branch(COutPoint(txid, i), txout_value,
                                   max_txs,
                                   tree_width=tree_width, fee=fee,
-                                  _total_txs=_total_txs):
-                    yield x
+                                  _total_txs=_total_txs)
 
         fee = int(0.0001*COIN)
         n = MAX_REPLACEMENT_LIMIT
@@ -395,9 +403,10 @@ class ReplaceByFeeTest(BitcoinTestFramework):
         split_value = int((initial_nValue-fee)/(MAX_REPLACEMENT_LIMIT+1))
         actual_fee = initial_nValue - split_value*(MAX_REPLACEMENT_LIMIT+1)
 
-        outputs = []
-        for i in range(MAX_REPLACEMENT_LIMIT+1):
-            outputs.append(CTxOut(split_value, CScript([1])))
+        outputs = [
+            CTxOut(split_value, CScript([1]))
+            for _ in range(MAX_REPLACEMENT_LIMIT + 1)
+        ]
 
         splitting_tx = CTransaction()
         splitting_tx.vin = [CTxIn(utxo, nSequence=0)]

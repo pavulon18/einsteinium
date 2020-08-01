@@ -57,7 +57,7 @@ class PruneTest(BitcoinTestFramework):
         sync_blocks(self.nodes[0:2])
         self.nodes[0].generate(150)
         # Then mine enough full blocks to create more than 550MiB of data
-        for i in range(645):
+        for _ in range(645):
             self.mine_full_block(self.nodes[0], self.address[0])
 
         sync_blocks(self.nodes[0:3])
@@ -69,7 +69,7 @@ class PruneTest(BitcoinTestFramework):
         print("Though we're already using more than 550MiB, current usage:", calc_usage(self.prunedir))
         print("Mining 25 more blocks should cause the first block file to be pruned")
         # Pruning doesn't run until we're allocating another chunk, 20 full blocks past the height cutoff will ensure this
-        for i in range(25):
+        for _ in range(25):
             self.mine_full_block(self.nodes[0],self.address[0])
 
         waitstart = time.time()
@@ -96,7 +96,7 @@ class PruneTest(BitcoinTestFramework):
             self.nodes[0]=start_node(0, self.options.tmpdir, ["-debug","-maxreceivebuffer=20000","-blockmaxsize=999000", "-checkblocks=5"], timewait=900)
             # Mine 24 blocks in node 1
             self.utxo = self.nodes[1].listunspent()
-            for i in range(24):
+            for _ in range(24):
                 if j == 0:
                     self.mine_full_block(self.nodes[1],self.address[1])
                 else:
@@ -104,7 +104,7 @@ class PruneTest(BitcoinTestFramework):
 
             # Reorg back with 25 block chain from node 0
             self.utxo = self.nodes[0].listunspent()
-            for i in range(25):
+            for _ in range(25):
                 self.mine_full_block(self.nodes[0],self.address[0])
 
             # Create connections in the order so both nodes can see the reorg at the same time
@@ -157,7 +157,7 @@ class PruneTest(BitcoinTestFramework):
         print("Usage possibly still high bc of stale blocks in block files:", calc_usage(self.prunedir))
 
         print("Mine 220 more blocks so we have requisite history (some blocks will be big and cause pruning of previous chain)")
-        for i in range(22):
+        for _ in range(22):
             # This can be slow, so do this in multiple RPC calls to avoid
             # RPC timeouts.
             self.nodes[0].generate(10) #node 0 has many large tx's in its mempool from the disconnects
@@ -203,7 +203,7 @@ class PruneTest(BitcoinTestFramework):
             print("Rewind node 0 to prev main chain to mine longer chain to trigger redownload. Blocks needed:", blocks_to_mine)
             self.nodes[0].invalidateblock(curchainhash)
             assert(self.nodes[0].getblockcount() == self.mainchainheight)
-            assert(self.nodes[0].getbestblockhash() == self.mainchainhash2)
+            assert self.nodes[0].getbestblockhash() == goalbesthash
             goalbesthash = self.nodes[0].generate(blocks_to_mine)[-1]
             goalbestheight = first_reorg_height + 1
 
@@ -220,7 +220,7 @@ class PruneTest(BitcoinTestFramework):
     def mine_full_block(self, node, address):
         # Want to create a full block
         # We'll generate a 66k transaction below, and 14 of them is close to the 1MB block limit
-        for j in range(14):
+        for _ in range(14):
             if len(self.utxo) < 14:
                 self.utxo = node.listunspent()
             inputs=[]

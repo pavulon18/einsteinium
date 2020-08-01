@@ -76,10 +76,11 @@ class NodeHandlingTest (BitcoinTestFramework):
             assert(node['addr'] != url.hostname+":"+str(p2p_port(1)))
 
         connect_nodes_bi(self.nodes,0,1) #reconnect the node
-        found = False
-        for node in self.nodes[0].getpeerinfo():
-            if node['addr'] == url.hostname+":"+str(p2p_port(1)):
-                found = True
+        found = any(
+            node['addr'] == url.hostname + ":" + str(p2p_port(1))
+            for node in self.nodes[0].getpeerinfo()
+        )
+
         assert(found)
 
 if __name__ == '__main__':

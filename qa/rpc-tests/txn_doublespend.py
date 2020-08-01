@@ -31,7 +31,7 @@ class TxnMallTest(BitcoinTestFramework):
         for i in range(4):
             assert_equal(self.nodes[i].getbalance(), starting_balance)
             self.nodes[i].getnewaddress("")  # bug workaround, coins generated assigned to first getnewaddress!
-        
+
         # Assign coins to foo and bar accounts:
         node0_address_foo = self.nodes[0].getnewaddress("foo")
         fund_foo_txid = self.nodes[0].sendfrom("", node0_address_foo, 1219)
@@ -50,17 +50,19 @@ class TxnMallTest(BitcoinTestFramework):
         # First: use raw transaction API to send 1240 BTC to node1_address,
         # but don't broadcast:
         doublespend_fee = Decimal('-.02')
-        rawtx_input_0 = {}
-        rawtx_input_0["txid"] = fund_foo_txid
-        rawtx_input_0["vout"] = find_output(self.nodes[0], fund_foo_txid, 1219)
-        rawtx_input_1 = {}
-        rawtx_input_1["txid"] = fund_bar_txid
-        rawtx_input_1["vout"] = find_output(self.nodes[0], fund_bar_txid, 29)
+        rawtx_input_0 = {
+            "txid": fund_foo_txid,
+            "vout": find_output(self.nodes[0], fund_foo_txid, 1219),
+        }
+
+        rawtx_input_1 = {
+            "txid": fund_bar_txid,
+            "vout": find_output(self.nodes[0], fund_bar_txid, 29),
+        }
+
         inputs = [rawtx_input_0, rawtx_input_1]
         change_address = self.nodes[0].getnewaddress()
-        outputs = {}
-        outputs[node1_address] = 1240
-        outputs[change_address] = 1248 - 1240 + doublespend_fee
+        outputs = {node1_address: 1240, change_address: 1248 - 1240 + doublespend_fee}
         rawtx = self.nodes[0].createrawtransaction(inputs, outputs)
         doublespend = self.nodes[0].signrawtransaction(rawtx)
         assert_equal(doublespend["complete"], True)
@@ -68,7 +70,7 @@ class TxnMallTest(BitcoinTestFramework):
         # Create two spends using 1 50 BTC coin each
         txid1 = self.nodes[0].sendfrom("foo", node1_address, 40, 0)
         txid2 = self.nodes[0].sendfrom("bar", node1_address, 20, 0)
-        
+
         # Have node0 mine a block:
         if (self.options.mine_block):
             self.nodes[0].generate(1)
@@ -97,7 +99,7 @@ class TxnMallTest(BitcoinTestFramework):
         else:
             assert_equal(tx1["confirmations"], 0)
             assert_equal(tx2["confirmations"], 0)
-        
+
         # Now give doublespend and its parents to miner:
         self.nodes[2].sendrawtransaction(fund_foo_tx["hex"])
         self.nodes[2].sendrawtransaction(fund_bar_tx["hex"])

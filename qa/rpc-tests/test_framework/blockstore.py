@@ -15,7 +15,7 @@ class BlockStore(object):
     def __init__(self, datadir):
         self.blockDB = dbmd.open(datadir + "/blocks", 'c')
         self.currentBlock = 0
-        self.headers_map = dict()
+        self.headers_map = {}
 
     def close(self):
         self.blockDB.close()
@@ -110,7 +110,7 @@ class BlockStore(object):
         lastBlock = self.get_block(current_tip)
         while lastBlock is not None:
             r.append(lastBlock.hashPrevBlock)
-            for i in range(step):
+            for _ in range(step):
                 lastBlock = self.get_block(lastBlock.hashPrevBlock)
                 if lastBlock is None:
                     break

@@ -66,7 +66,7 @@ class ZMQTest (BitcoinTestFramework):
 
         zmqHashes = []
         blockcount = 0
-        for x in range(0,n*2):
+        for _ in range(n*2):
             msg = self.zmqSubSocket.recv_multipart()
             topic = msg[0]
             body = msg[1]
@@ -76,7 +76,7 @@ class ZMQTest (BitcoinTestFramework):
                 assert_equal(msgSequence, blockcount+1)
                 blockcount += 1
 
-        for x in range(0,n):
+        for x in range(n):
             assert_equal(genhashes[x], zmqHashes[x]) #blockhash from generate must be equal to the hash received over zmq
 
         #test tx from a second node

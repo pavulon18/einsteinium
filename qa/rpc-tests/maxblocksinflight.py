@@ -45,12 +45,12 @@ class TestManager(NodeConnCB):
         numBlocksToGenerate = [8, 16, 128, 1024]
         for count in range(len(numBlocksToGenerate)):
             current_invs = []
-            for i in range(numBlocksToGenerate[count]):
+            for _ in range(numBlocksToGenerate[count]):
                 current_invs.append(CInv(2, random.randrange(0, 1 << 256)))
                 if len(current_invs) >= 50000:
                     self.connection.send_message(msg_inv(current_invs))
                     current_invs = []
-            if len(current_invs) > 0:
+            if current_invs:
                 self.connection.send_message(msg_inv(current_invs))
 
             # Wait and see how many blocks were requested

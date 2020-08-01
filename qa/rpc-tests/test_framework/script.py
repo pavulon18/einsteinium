@@ -76,17 +76,14 @@ class CScriptOp(int):
         if self == OP_0:
             return 0
 
-        if not (self == OP_0 or OP_1 <= self <= OP_16):
+        if not OP_1 <= self <= OP_16:
             raise ValueError('op %r is not an OP_N' % self)
 
         return int(self - OP_1+1)
 
     def is_small_int(self):
         """Return true if the op pushes a small integer to the stack"""
-        if 0x51 <= self <= 0x60 or self == 0:
-            return True
-        else:
-            return False
+        return 0x51 <= self <= 0x60 or self == 0
 
     def __str__(self):
         return repr(self)
@@ -660,10 +657,12 @@ class CScript(bytes):
         if isinstance(other, CScriptOp):
             other = bchr(other)
         elif isinstance(other, CScriptNum):
-            if (other.value == 0):
-                other = bchr(CScriptOp(OP_0))
-            else:
-                other = CScriptNum.encode(other)
+            other = (
+                bchr(CScriptOp(OP_0))
+                if (other.value == 0)
+                else CScriptNum.encode(other)
+            )
+
         elif isinstance(other, int):
             if 0 <= other <= 16:
                 other = bytes(bchr(CScriptOp.encode_op_n(other)))
@@ -820,10 +819,12 @@ class CScript(bytes):
             if opcode in (OP_CHECKSIG, OP_CHECKSIGVERIFY):
                 n += 1
             elif opcode in (OP_CHECKMULTISIG, OP_CHECKMULTISIGVERIFY):
-                if fAccurate and (OP_1 <= lastOpcode <= OP_16):
-                    n += opcode.decode_op_n()
-                else:
-                    n += 20
+                n += (
+                    opcode.decode_op_n()
+                    if fAccurate and (OP_1 <= lastOpcode <= OP_16)
+                    else 20
+                )
+
             lastOpcode = opcode
         return n
 
@@ -842,10 +843,7 @@ def FindAndDelete(script, sig):
         if not skip:
             r += script[last_sop_idx:sop_idx]
         last_sop_idx = sop_idx
-        if script[sop_idx:sop_idx + len(sig)] == sig:
-            skip = True
-        else:
-            skip = False
+        skip = True if script[sop_idx:sop_idx + len(sig)] == sig else False
     if not skip:
         r += script[last_sop_idx:]
     return CScript(r)
@@ -881,7 +879,7 @@ def SignatureHash(script, txTo, inIdx, hashtype):
 
         tmp = txtmp.vout[outIdx]
         txtmp.vout = []
-        for i in range(outIdx):
+        for _ in range(outIdx):
             txtmp.vout.append(CTxOut(-1))
         txtmp.vout.append(tmp)
 

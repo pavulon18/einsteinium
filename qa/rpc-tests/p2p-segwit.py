@@ -183,8 +183,14 @@ class SegWitTest(BitcoinTestFramework):
         initialize_chain_clean(self.options.tmpdir, 3)
 
     def setup_network(self):
-        self.nodes = []
-        self.nodes.append(start_node(0, self.options.tmpdir, ["-debug", "-logtimemicros=1", "-whitelist=127.0.0.1"]))
+        self.nodes = [
+            start_node(
+                0,
+                self.options.tmpdir,
+                ["-debug", "-logtimemicros=1", "-whitelist=127.0.0.1"],
+            )
+        ]
+
         # Start a node for testing IsStandard rules.
         self.nodes.append(start_node(1, self.options.tmpdir, ["-debug", "-logtimemicros=1", "-whitelist=127.0.0.1", "-acceptnonstdtxn=0"]))
         connect_nodes(self.nodes[0], 1)
@@ -1164,15 +1170,12 @@ class SegWitTest(BitcoinTestFramework):
             tx3.vout = [CTxOut(tx.vout[0].nValue-100000, CScript([OP_TRUE]))]
             tx3.wit.vtxinwit.append(CTxInWitness())
             tx3.wit.vtxinwit[0].scriptWitness.stack = [witness_program]
-            tx3.rehash()
-            self.test_node.test_transaction_acceptance(tx3, with_witness=True, accepted=True)
         else:
             # tx and tx2 didn't go anywhere; just clean up the p2sh_tx output.
             tx3.vin = [CTxIn(COutPoint(p2sh_tx.sha256, 0), CScript([witness_program]))]
             tx3.vout = [CTxOut(p2sh_tx.vout[0].nValue-100000, witness_program)]
-            tx3.rehash()
-            self.test_node.test_transaction_acceptance(tx3, with_witness=True, accepted=True)
-
+        tx3.rehash()
+        self.test_node.test_transaction_acceptance(tx3, with_witness=True, accepted=True)
         self.nodes[0].generate(1)
         sync_blocks(self.nodes)
         self.utxo.pop(0)
@@ -1190,7 +1193,7 @@ class SegWitTest(BitcoinTestFramework):
             tx = CTransaction()
             tx.vin.append(CTxIn(COutPoint(self.utxo[0].sha256, self.utxo[0].n), b""))
             split_value = (self.utxo[0].nValue - 4000) // NUM_TESTS
-            for i in range(NUM_TESTS):
+            for _ in range(NUM_TESTS):
                 tx.vout.append(CTxOut(split_value, CScript([OP_TRUE])))
             tx.rehash()
             block = self.build_next_block()
@@ -1366,7 +1369,7 @@ class SegWitTest(BitcoinTestFramework):
         tx = CTransaction()
         tx.vin.append(CTxIn(COutPoint(prev_utxo.sha256, prev_utxo.n), b""))
         split_value = prev_utxo.nValue // NUM_TESTS
-        for i in range(NUM_TESTS):
+        for _ in range(NUM_TESTS):
             tx.vout.append(CTxOut(split_value, scriptPubKey))
         tx.wit.vtxinwit.append(CTxInWitness())
         sign_P2PK_witness_input(witness_program, tx, 0, SIGHASH_ALL, prev_utxo.nValue, key)
@@ -1396,7 +1399,7 @@ class SegWitTest(BitcoinTestFramework):
                 tx.wit.vtxinwit.append(CTxInWitness())
                 total_value += temp_utxos[i].nValue
             split_value = total_value // num_outputs
-            for i in range(num_outputs):
+            for _ in range(num_outputs):
                 tx.vout.append(CTxOut(split_value, scriptPubKey))
             for i in range(num_inputs):
                 # Now try to sign each input, using a random hashtype.
@@ -1621,7 +1624,7 @@ class SegWitTest(BitcoinTestFramework):
         split_value = self.utxo[0].nValue // outputs
         tx = CTransaction()
         tx.vin.append(CTxIn(COutPoint(self.utxo[0].sha256, self.utxo[0].n), b""))
-        for i in range(outputs):
+        for _ in range(outputs):
             tx.vout.append(CTxOut(split_value, scriptPubKey))
         tx.vout[-2].scriptPubKey = scriptPubKey_toomany
         tx.vout[-1].scriptPubKey = scriptPubKey_justright
@@ -1640,7 +1643,7 @@ class SegWitTest(BitcoinTestFramework):
             tx2.wit.vtxinwit.append(CTxInWitness())
             tx2.wit.vtxinwit[-1].scriptWitness.stack = [ witness_program ]
             total_value += tx.vout[i].nValue
-        tx2.wit.vtxinwit[-1].scriptWitness.stack = [ witness_program_toomany ] 
+        tx2.wit.vtxinwit[-1].scriptWitness.stack = [ witness_program_toomany ]
         tx2.vout.append(CTxOut(total_value, CScript([OP_TRUE])))
         tx2.rehash()
 
@@ -1845,8 +1848,7 @@ class SegWitTest(BitcoinTestFramework):
         pad = chr(1).encode('latin-1')
 
         # Create scripts for tests
-        scripts = []
-        scripts.append(CScript([OP_DROP] * 100))
+        scripts = [CScript([OP_DROP] * 100)]
         scripts.append(CScript([OP_DROP] * 99))
         scripts.append(CScript([pad * 59] * 59 + [OP_DROP] * 60))
         scripts.append(CScript([pad * 59] * 59 + [OP_DROP] * 61))
@@ -1955,8 +1957,16 @@ class SegWitTest(BitcoinTestFramework):
 
         self.p2p_connections = [self.test_node, self.old_node]
 
-        self.connections = []
-        self.connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.test_node, services=NODE_NETWORK|NODE_WITNESS))
+        self.connections = [
+            NodeConn(
+                '127.0.0.1',
+                p2p_port(0),
+                self.nodes[0],
+                self.test_node,
+                services=NODE_NETWORK | NODE_WITNESS,
+            )
+        ]
+
         self.connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.old_node, services=NODE_NETWORK))
         self.connections.append(NodeConn('127.0.0.1', p2p_port(1), self.nodes[1], self.std_node, services=NODE_NETWORK|NODE_WITNESS))
         self.test_node.add_connection(self.connections[0])

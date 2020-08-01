@@ -140,10 +140,12 @@ def sync_mempools(rpc_connections, wait=1, timeout=60):
     """
     while timeout > 0:
         pool = set(rpc_connections[0].getrawmempool())
-        num_match = 1
-        for i in range(1, len(rpc_connections)):
-            if set(rpc_connections[i].getrawmempool()) == pool:
-                num_match = num_match+1
+        num_match = 1 + sum(
+            1
+            for i in range(1, len(rpc_connections))
+            if set(rpc_connections[i].getrawmempool()) == pool
+        )
+
         if num_match == len(rpc_connections):
             return True
         time.sleep(wait)
@@ -208,11 +210,10 @@ def initialize_chain(test_dir, num_nodes):
     """
 
     assert num_nodes <= MAX_NODES
-    create_cache = False
-    for i in range(MAX_NODES):
-        if not os.path.isdir(os.path.join('cache', 'node'+str(i))):
-            create_cache = True
-            break
+    create_cache = any(
+        not os.path.isdir(os.path.join('cache', 'node' + str(i)))
+        for i in range(MAX_NODES)
+    )
 
     if create_cache:
 
@@ -251,9 +252,9 @@ def initialize_chain(test_dir, num_nodes):
         # starting from 2010 minutes in the past
         enable_mocktime()
         block_time = get_mocktime() - (201 * 10 * 60)
-        for i in range(2):
+        for _ in range(2):
             for peer in range(4):
-                for j in range(25):
+                for _ in range(25):
                     set_node_times(rpcs, block_time)
                     rpcs[peer].generate(1)
                     block_time += 10*60
@@ -550,18 +551,15 @@ def assert_array_result(object_array, to_match, expected, should_not_find = Fals
         assert_equal(expected, { })
     num_matched = 0
     for item in object_array:
-        all_match = True
-        for key,value in to_match.items():
-            if item[key] != value:
-                all_match = False
+        all_match = all(item[key] == value for key,value in to_match.items())
         if not all_match:
             continue
         elif should_not_find == True:
-            num_matched = num_matched+1
+            num_matched += 1
         for key,value in expected.items():
             if item[key] != value:
                 raise AssertionError("%s : expected %s=%s"%(str(item), str(key), str(value)))
-            num_matched = num_matched+1
+            num_matched += 1
     if num_matched == 0 and should_not_find != True:
         raise AssertionError("No objects matched %s"%(str(to_match)))
     if num_matched > 0 and should_not_find == True:
@@ -580,10 +578,9 @@ def create_confirmed_utxos(fee, node, count):
     addr2 = node.getnewaddress()
     if iterations <= 0:
         return utxos
-    for i in range(iterations):
+    for _ in range(iterations):
         t = utxos.pop()
-        inputs = []
-        inputs.append({ "txid" : t["txid"], "vout" : t["vout"]})
+        inputs = [{"txid": t["txid"], "vout": t["vout"]}]
         outputs = {}
         send_value = t['amount'] - fee
         outputs[addr1] = satoshi_round(send_value/2)
@@ -607,16 +604,16 @@ def gen_return_txouts():
     # create one script_pubkey
     script_pubkey = "6a4d0200" #OP_RETURN OP_PUSH2 512 bytes
     for i in range (512):
-        script_pubkey = script_pubkey + "01"
+        script_pubkey += "01"
     # concatenate 128 txouts of above script_pubkey which we'll insert before the txout for change
     txouts = "81"
-    for k in range(128):
+    for _ in range(128):
         # add txout value
-        txouts = txouts + "0000000000000000"
+        txouts += "0000000000000000"
         # add length of script_pubkey
-        txouts = txouts + "fd0402"
+        txouts += "fd0402"
         # add script_pubkey
-        txouts = txouts + script_pubkey
+        txouts += script_pubkey
     return txouts
 
 def create_tx(node, coinbase, to_address, amount):
@@ -632,10 +629,9 @@ def create_tx(node, coinbase, to_address, amount):
 def create_lots_of_big_transactions(node, txouts, utxos, fee):
     addr = node.getnewaddress()
     txids = []
-    for i in range(len(utxos)):
+    for utxo in utxos:
         t = utxos.pop()
-        inputs = []
-        inputs.append({ "txid" : t["txid"], "vout" : t["vout"]})
+        inputs = [{"txid": t["txid"], "vout": t["vout"]}]
         outputs = {}
         send_value = t['amount'] - fee
         outputs[addr] = satoshi_round(send_value)
