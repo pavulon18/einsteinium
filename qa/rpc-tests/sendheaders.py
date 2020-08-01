@@ -266,8 +266,7 @@ class SendHeadersTest(BitcoinTestFramework):
 
         self.p2p_connections = [inv_node, test_node]
 
-        connections = []
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], inv_node))
+        connections = [NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], inv_node)]
         # Set nServices to 0 for test_node, so no block download will occur outside of
         # direct fetching
         connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], test_node, services=0))
@@ -433,10 +432,9 @@ class SendHeadersTest(BitcoinTestFramework):
                     # triggering resumption of headers announcements.
                     if j == 0:
                         test_node.get_headers(locator=[tip], hashstop=0)
-                        test_node.sync_with_ping()
                     else:
                         test_node.send_block_inv(tip)
-                        test_node.sync_with_ping()
+                    test_node.sync_with_ping()
             # New blocks should now be announced with header
             tip = self.mine_blocks(1)
             assert_equal(inv_node.check_last_announcement(inv=[tip]), True)

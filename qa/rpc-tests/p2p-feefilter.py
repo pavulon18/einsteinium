@@ -18,7 +18,7 @@ def hashToHex(hash):
 
 # Wait up to 60 secs to see if the testnode has received all the expected invs
 def allInvsMatch(invsExpected, testnode):
-    for x in range(60):
+    for _ in range(60):
         with mininode_lock:
             if (sorted(invsExpected) == sorted(testnode.txinvs)):
                 return True;
@@ -55,8 +55,7 @@ class FeeFilterTest(BitcoinTestFramework):
     def setup_network(self):
         # Node1 will be used to generate txs which should be relayed from Node0
         # to our test node
-        self.nodes = []
-        self.nodes.append(start_node(0, self.options.tmpdir, ["-debug", "-logtimemicros"]))
+        self.nodes = [start_node(0, self.options.tmpdir, ["-debug", "-logtimemicros"])]
         self.nodes.append(start_node(1, self.options.tmpdir, ["-debug", "-logtimemicros"]))
         connect_nodes(self.nodes[0], 1)
 

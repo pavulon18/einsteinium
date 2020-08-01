@@ -17,8 +17,7 @@ class BIP65Test(BitcoinTestFramework):
         self.setup_clean_chain = False
 
     def setup_network(self):
-        self.nodes = []
-        self.nodes.append(start_node(0, self.options.tmpdir, []))
+        self.nodes = [start_node(0, self.options.tmpdir, [])]
         self.nodes.append(start_node(1, self.options.tmpdir, ["-blockversion=3"]))
         self.nodes.append(start_node(2, self.options.tmpdir, ["-blockversion=4"]))
         connect_nodes(self.nodes[1], 0)

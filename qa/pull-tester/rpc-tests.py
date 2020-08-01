@@ -21,6 +21,7 @@ For a description of arguments recognized by test scripts, see
 
 """
 
+
 import os
 import time
 import shutil
@@ -62,7 +63,7 @@ print_help = False
 run_parallel = 4
 
 for arg in sys.argv[1:]:
-    if arg == "--help" or arg == "-h" or arg == "-?":
+    if arg in ["--help", "-h", "-?"]:
         print_help = True
         break
     if arg == '--coverage':
@@ -86,7 +87,7 @@ if EXEEXT == ".exe" and "-win" not in opts:
     print("Win tests currently disabled by default.  Use -win option to enable")
     sys.exit(0)
 
-if not (ENABLE_WALLET == 1 and ENABLE_UTILS == 1 and ENABLE_BITCOIND == 1):
+if ENABLE_WALLET != 1 or ENABLE_UTILS != 1 or ENABLE_BITCOIND != 1:
     print("No rpc tests to run. Wallet, utils, and bitcoind must all be enabled")
     sys.exit(0)
 
@@ -210,14 +211,14 @@ def runtests():
     job_queue = RPCTestHandler(run_parallel, test_list, flags)
     results = BOLD[1] + "%s | %s | %s\n\n" % ("TEST".ljust(max_len_name), "PASSED", "DURATION") + BOLD[0]
     all_passed = True
-    for _ in range(len(test_list)):
+    for test in test_list:
         (name, stdout, stderr, passed, duration) = job_queue.get_next()
         all_passed = all_passed and passed
         time_sum += duration
 
         print('\n' + BOLD[1] + name + BOLD[0] + ":")
         print(stdout)
-        print('stderr:\n' if not stderr == '' else '', stderr)
+        print('stderr:\n' if stderr != '' else '', stderr)
         results += "%s | %s | %s s\n" % (name.ljust(max_len_name), str(passed).ljust(6), duration)
         print("Pass: %s%s%s, Duration: %s s\n" % (BOLD[1], passed, BOLD[0], duration))
     results += BOLD[1] + "\n%s | %s | %s s (accumulated)" % ("ALL".ljust(max_len_name), str(all_passed).ljust(6), time_sum) + BOLD[0]

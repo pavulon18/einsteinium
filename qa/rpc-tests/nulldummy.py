@@ -18,7 +18,7 @@ def trueDummy(tx):
     scriptSig = CScript(tx.vin[0].scriptSig)
     newscript = []
     for i in scriptSig:
-        if (len(newscript) == 0):
+        if not newscript:
             assert(len(i) == 0)
             newscript.append(b'\x51')
         else:

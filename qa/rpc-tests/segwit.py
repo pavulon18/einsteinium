@@ -66,10 +66,7 @@ def send_to_witness(version, node, utxo, pubkey, encode_p2sh, amount, sign=True,
     return node.sendrawtransaction(tx_to_witness)
 
 def getutxo(txid):
-    utxo = {}
-    utxo["vout"] = 0
-    utxo["txid"] = txid
-    return utxo
+    return {"vout": 0, "txid": txid}
 
 def find_unspent(node, min_value):
     for utxo in node.listunspent():
@@ -83,8 +80,19 @@ class SegWitTest(BitcoinTestFramework):
         initialize_chain_clean(self.options.tmpdir, 3)
 
     def setup_network(self):
-        self.nodes = []
-        self.nodes.append(start_node(0, self.options.tmpdir, ["-logtimemicros", "-debug", "-walletprematurewitness", "-rpcserialversion=0"]))
+        self.nodes = [
+            start_node(
+                0,
+                self.options.tmpdir,
+                [
+                    "-logtimemicros",
+                    "-debug",
+                    "-walletprematurewitness",
+                    "-rpcserialversion=0",
+                ],
+            )
+        ]
+
         self.nodes.append(start_node(1, self.options.tmpdir, ["-logtimemicros", "-debug", "-blockversion=4", "-promiscuousmempoolflags=517", "-prematurewitness", "-walletprematurewitness", "-rpcserialversion=1"]))
         self.nodes.append(start_node(2, self.options.tmpdir, ["-logtimemicros", "-debug", "-blockversion=536870915", "-promiscuousmempoolflags=517", "-prematurewitness", "-walletprematurewitness"]))
         connect_nodes(self.nodes[1], 0)

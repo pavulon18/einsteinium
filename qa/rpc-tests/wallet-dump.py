@@ -67,13 +67,13 @@ class WalletDumpTest(BitcoinTestFramework):
         # the test often takes even longer.
         self.nodes = start_nodes(self.num_nodes, self.options.tmpdir, self.extra_args, timewait=60)
 
-    def run_test (self):
+    def run_test(self):
         tmpdir = self.options.tmpdir
 
         # generate 20 addresses to compare against the dump
         test_addr_count = 20
         addrs = []
-        for i in range(0,test_addr_count):
+        for _ in range(test_addr_count):
             addr = self.nodes[0].getnewaddress()
             vaddr= self.nodes[0].validateaddress(addr) #required to get hd keypath
             addrs.append(vaddr)

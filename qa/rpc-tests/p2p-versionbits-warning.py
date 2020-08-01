@@ -103,8 +103,7 @@ class VersionBitsWarningTest(BitcoinTestFramework):
         # Setup the p2p connection and start up the network thread.
         test_node = TestNode()
 
-        connections = []
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], test_node))
+        connections = [NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], test_node)]
         test_node.add_connection(connections[0])
 
         NetworkThread().start() # Start up network handling in another thread

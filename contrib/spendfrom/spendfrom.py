@@ -69,7 +69,7 @@ def connect_JSON(config):
     """Connect to a bitcoin JSON-RPC server"""
     testnet = config.get('testnet', '0')
     testnet = (int(testnet) > 0)  # 0/1 in config file, convert to True/False
-    if not 'rpcport' in config:
+    if 'rpcport' not in config:
         config['rpcport'] = 31879 if testnet else 41879
     connect = "http://%s:%s@127.0.0.1:%s"%(config['rpcuser'], config['rpcpassword'], config['rpcport'])
     try:
@@ -100,9 +100,9 @@ def unlock_wallet(bitcoind):
     return int(info['unlocked_until']) > time.time()
 
 def list_available(bitcoind):
-    address_summary = dict()
+    address_summary = {}
 
-    address_to_account = dict()
+    address_to_account = {}
     for info in bitcoind.listreceivedbyaddress(0):
         address_to_account[info["address"]] = info["account"]
 
@@ -117,7 +117,7 @@ def list_available(bitcoind):
         # or pay-to-script-hash outputs right now; anything exotic is ignored.
         if pk["type"] != "pubkeyhash" and pk["type"] != "scripthash":
             continue
-        
+
         address = pk["addresses"][0]
         if address in address_summary:
             address_summary[address]["total"] += vout["value"]
@@ -178,9 +178,7 @@ def create_tx(bitcoind, fromaddresses, toaddress, amount, fee):
     if not signed_rawtx["complete"]:
         sys.stderr.write("signrawtransaction failed\n")
         sys.exit(1)
-    txdata = signed_rawtx["hex"]
-
-    return txdata
+    return signed_rawtx["hex"]
 
 def compute_amount_in(bitcoind, txinfo):
     result = Decimal("0.0")

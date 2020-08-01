@@ -74,10 +74,7 @@ class AuthServiceProxy(object):
         self._service_name = service_name
         self.ensure_ascii = ensure_ascii # can be toggled on the fly by tests
         self.__url = urlparse.urlparse(service_url)
-        if self.__url.port is None:
-            port = 80
-        else:
-            port = self.__url.port
+        port = 80 if self.__url.port is None else self.__url.port
         (user, passwd) = (self.__url.username, self.__url.password)
         try:
             user = user.encode('utf8')

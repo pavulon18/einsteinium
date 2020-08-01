@@ -148,7 +148,7 @@ class CompactBlocksTest(BitcoinTestFramework):
         out_value = total_value // 10
         tx = CTransaction()
         tx.vin.append(CTxIn(COutPoint(block.vtx[0].sha256, 0), b''))
-        for i in range(10):
+        for _ in range(10):
             tx.vout.append(CTxOut(out_value, CScript([OP_TRUE])))
         tx.rehash()
 
@@ -294,7 +294,7 @@ class CompactBlocksTest(BitcoinTestFramework):
             node.generate(1)
 
         segwit_tx_generated = False
-        for i in range(num_transactions):
+        for _ in range(num_transactions):
             txid = node.sendtoaddress(address, 0.1)
             hex_tx = node.gettransaction(txid)["hex"]
             tx = FromHex(CTransaction(), hex_tx)
@@ -425,10 +425,7 @@ class CompactBlocksTest(BitcoinTestFramework):
             assert_equal(absolute_indexes, [0])  # should be a coinbase request
 
             # Send the coinbase, and verify that the tip advances.
-            if version == 2:
-                msg = msg_witness_blocktxn()
-            else:
-                msg = msg_blocktxn()
+            msg = msg_witness_blocktxn() if version == 2 else msg_blocktxn()
             msg.block_transactions.blockhash = block.sha256
             msg.block_transactions.transactions = [block.vtx[0]]
             test_node.send_and_ping(msg)
@@ -438,7 +435,7 @@ class CompactBlocksTest(BitcoinTestFramework):
     def build_block_with_transactions(self, node, utxo, num_transactions):
         block = self.build_block_on_tip(node)
 
-        for i in range(num_transactions):
+        for _ in range(num_transactions):
             tx = CTransaction()
             tx.vin.append(CTxIn(COutPoint(utxo[0], utxo[1]), b''))
             tx.vout.append(CTxOut(utxo[2] - 100000, CScript([OP_TRUE])))
@@ -583,7 +580,7 @@ class CompactBlocksTest(BitcoinTestFramework):
         success = wait_until(lambda: test_node.last_getdata is not None, timeout=10)
         assert(success)
         assert_equal(len(test_node.last_getdata.inv), 1)
-        assert(test_node.last_getdata.inv[0].type == 2 or test_node.last_getdata.inv[0].type == 2|MSG_WITNESS_FLAG)
+        assert test_node.last_getdata.inv[0].type in [2, 2|MSG_WITNESS_FLAG]
         assert_equal(test_node.last_getdata.inv[0].hash, block.sha256)
 
         # Deliver the block
@@ -645,7 +642,7 @@ class CompactBlocksTest(BitcoinTestFramework):
         # Test that requesting old compactblocks doesn't work.
         MAX_CMPCTBLOCK_DEPTH = 5
         new_blocks = []
-        for i in range(MAX_CMPCTBLOCK_DEPTH + 1):
+        for _ in range(MAX_CMPCTBLOCK_DEPTH + 1):
             test_node.clear_block_announcement()
             new_blocks.append(node.generate(1)[0])
             wait_until(test_node.received_block_announcement, timeout=30)
@@ -814,8 +811,10 @@ class CompactBlocksTest(BitcoinTestFramework):
         self.segwit_node = TestNode()
         self.old_node = TestNode()  # version 1 peer <--> segwit node
 
-        connections = []
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.test_node))
+        connections = [
+            NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.test_node)
+        ]
+
         connections.append(NodeConn('127.0.0.1', p2p_port(1), self.nodes[1],
                     self.segwit_node, services=NODE_NETWORK|NODE_WITNESS))
         connections.append(NodeConn('127.0.0.1', p2p_port(1), self.nodes[1],

@@ -106,10 +106,7 @@ class ListTransactionsTest(BitcoinTestFramework):
         # Check whether a transaction signals opt-in RBF itself
         def is_opt_in(node, txid):
             rawtx = node.getrawtransaction(txid, 1)
-            for x in rawtx["vin"]:
-                if x["sequence"] < 0xfffffffe:
-                    return True
-            return False
+            return any(x["sequence"] < 0xfffffffe for x in rawtx["vin"])
 
         # Find an unconfirmed output matching a certain txid
         def get_unconfirmed_utxo_entry(node, txid_to_match):
